@@ -141,7 +141,11 @@ class Writer {
     } else if constexpr (std::is_same<std::remove_cvref_t<T>, bool>()) {
       cbor_encode_boolean(_parent, _var);
     } else if constexpr (std::is_floating_point<std::remove_cvref_t<T>>()) {
-      cbor_encode_double(_parent, static_cast<double>(_var));
+      if constexpr (std::is_same<std::remove_cvref_t<T>, float>()) {
+        cbor_encode_float(_parent, _var);
+      } else {
+        cbor_encode_double(_parent, static_cast<double>(_var));
+      }
     } else if constexpr (std::is_integral<std::remove_cvref_t<T>>()) {
       cbor_encode_int(_parent, static_cast<std::int64_t>(_var));
     } else {
