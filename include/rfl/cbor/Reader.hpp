@@ -55,12 +55,14 @@ struct Reader {
     if (err != CborNoError) {
       return Error(cbor_error_string(err));
     }
-    size_t length = 0;
-    err = cbor_value_get_map_length(&_obj.val_, &length);
-    if (err != CborNoError) {
-      return Error(cbor_error_string(err));
-    }
-    for (size_t i = 0; i < length; ++i) {
+    // TODO: Test this
+    // size_t length = 0;
+    // err = cbor_value_get_map_length(&_obj.val_, &length);
+    // if (err != CborNoError) {
+    //   return Error(cbor_error_string(err));
+    // }
+    // for (size_t i = 0; i < length; ++i) {
+    while (!cbor_value_at_end(&var.val_)) {
       if (!cbor_value_is_text_string(&var.val_)) {
         return Error("Expected the key to be a string value.");
       }
@@ -188,21 +190,15 @@ struct Reader {
   template <class ObjectReader>
   std::optional<Error> read_object(const ObjectReader& _object_reader,
                                    const InputObjectType& _obj) const noexcept {
-    size_t length = 0;
-    auto err = cbor_value_get_map_length(&_obj.val_, &length);
-    if (err != CborNoError) {
-      return Error(cbor_error_string(err));
-    }
-
     InputVarType var;
-    err = cbor_value_enter_container(&_obj.val_, &var.val_);
+    auto err = cbor_value_enter_container(&_obj.val_, &var.val_);
     if (err != CborNoError) {
       return Error(cbor_error_string(err));
     }
 
     auto buffer = std::vector<char>();
 
-    for (size_t i = 0; i < length; ++i) {
+    while (!cbor_value_at_end(&var.val_)) {
       err = get_string(&var.val_, &buffer);
       if (err != CborNoError) {
         return Error(cbor_error_string(err));
