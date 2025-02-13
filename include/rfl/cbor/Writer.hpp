@@ -112,6 +112,8 @@ class Writer {
       cbor_encode_boolean(_parent, _var);
     } else if constexpr (std::is_floating_point<std::remove_cvref_t<T>>()) {
       cbor_encode_double(_parent, static_cast<double>(_var));
+    } else if constexpr (std::is_unsigned<std::remove_cvref_t<T>>()) {
+      cbor_encode_uint(_parent, static_cast<std::uint64_t>(_var));
     } else if constexpr (std::is_integral<std::remove_cvref_t<T>>()) {
       cbor_encode_int(_parent, static_cast<std::int64_t>(_var));
     } else {
