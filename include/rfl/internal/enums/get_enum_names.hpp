@@ -84,7 +84,9 @@ consteval auto get_range_min() {
   if constexpr (_is_flag) {
     return 0;
   } else {
-    return std::max(std::numeric_limits<U>::min(), range_min<T>::value);
+    return std::max(
+      static_cast<decltype(range_min<T>::value)>(std::numeric_limits<U>::min()),
+      range_min<T>::value );
   }
 }
 template <class T, bool _is_flag>
@@ -97,7 +99,9 @@ consteval auto get_range_max() {
       return (sizeof(U) * 8 - 1);
     }
   } else {
-    return std::min(std::numeric_limits<U>::max(), range_max<T>::value);
+    return std::min(
+      static_cast<decltype(range_max<T>::value)>(std::numeric_limits<U>::max()),
+      range_max<T>::value );
   }
 }
 
