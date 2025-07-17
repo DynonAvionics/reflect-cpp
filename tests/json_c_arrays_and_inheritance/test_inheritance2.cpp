@@ -4,8 +4,6 @@
 #include <iostream>
 #include <rfl.hpp>
 
-#include "rfl/num_fields.hpp"
-
 namespace test_inheritance2 {
 
 struct EmptyBase1 {};
