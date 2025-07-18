@@ -6,6 +6,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons_ext/cbor/decode_cbor.hpp>
 #include <string>
+#include <span>
 
 #include "../Processors.hpp"
 #include "../internal/wrap_in_rfl_array_t.hpp"
@@ -31,6 +32,21 @@ Result<internal::wrap_in_rfl_array_t<T>> read(const std::vector<char>& _bytes) {
     return rfl::error(error);
   }
 }
+
+template <class T, class... Ps>
+Result<internal::wrap_in_rfl_array_t<T>> read(const std::span<char>& _bytes) {
+  // TODO: Use a non-throwing decode_cbor(), pending https://github.com/danielaparker/jsoncons/issues/615
+  try {
+    auto val = jsoncons::cbor::decode_cbor<jsoncons::json>(_bytes.begin(), _bytes.end());
+    auto r = Reader();
+    return Parser<T, Processors<Ps...>>::read(r, InputVarType{&val});
+  } catch(const jsoncons::ser_error& e)  {
+    std::string error("Could not parse CBOR: ");
+    error.append(e.what());
+    return rfl::error(error);
+  }
+}
+
 
 /// Parses an object from a stream.
 template <class T, class... Ps>
