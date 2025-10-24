@@ -22,15 +22,13 @@ using InputVarType = typename Reader::InputVarType;
 template <class T, class... Ps>
 Result<internal::wrap_in_rfl_array_t<T>> read(
     const concepts::ContiguousByteContainer auto& _bytes) {
-  // TODO: Use a non-throwing decode_ubjson(), pending
-  // https://github.com/danielaparker/jsoncons/issues/615
-  try {
-    auto val = jsoncons::ubjson::decode_ubjson<jsoncons::json>(_bytes);
+  auto result = jsoncons::ubjson::try_decode_ubjson<jsoncons::json>(_bytes);
+  if (result.has_value()) {
     auto r = Reader();
-    return Parser<T, Processors<Ps...>>::read(r, InputVarType{&val});
-  } catch (const jsoncons::ser_error& e) {
+    return Parser<T, Processors<Ps...>>::read(r, InputVarType{&result.value()});
+  } else {
     std::string error("Could not parse UBJSON: ");
-    error.append(e.what());
+    error.append(result.error().message());
     return rfl::error(error);
   }
 }
@@ -38,15 +36,13 @@ Result<internal::wrap_in_rfl_array_t<T>> read(
 /// Parses an object from a stream.
 template <class T, class... Ps>
 Result<internal::wrap_in_rfl_array_t<T>> read(std::istream& _stream) {
-  // TODO: Use a non-throwing decode_ubjson(), pending
-  // https://github.com/danielaparker/jsoncons/issues/615
-  try {
-    auto val = jsoncons::ubjson::decode_ubjson<jsoncons::json>(_stream);
+  auto result = jsoncons::ubjson::try_decode_ubjson<jsoncons::json>(_stream);
+  if (result.has_value()) {
     auto r = Reader();
-    return Parser<T, Processors<Ps...>>::read(r, InputVarType{&val});
-  } catch (const jsoncons::ser_error& e) {
+    return Parser<T, Processors<Ps...>>::read(r, InputVarType{&result.value()});
+  } else {
     std::string error("Could not parse UBJSON: ");
-    error.append(e.what());
+    error.append(result.error().message());
     return rfl::error(error);
   }
 }
